@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'nomor_telepon',
+        'path_sim',
+        'tanggal_lahir',
+        'alamat',
+        'role',
     ];
 
     /**
@@ -40,5 +45,24 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
+
+    // --- RELASI ---
+
+    /**
+     * User memiliki banyak Rental.
+     */
+    public function rentals()
+    {
+        return $this->hasMany(Rental::class);
+    }
+
+    /**
+     * User memiliki banyak Notification.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
 }
