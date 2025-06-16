@@ -9,13 +9,59 @@ use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB; // <-- Tambahkan ini
+use Carbon\Carbon; // <-- Tambahkan ini
+
 
 class DashboardController extends Controller
 {
     /**
-     * Menyediakan data ringkasan untuk dashboard admin.
+     * Menampilkan halaman dashboard untuk web.
      */
-    public function summary(): JsonResponse
+    public function index()
+    {
+        // --- Data Statistik Kartu ---
+        $summaryData = [
+            'total_pendapatan' => Payment::where('status_pembayaran', 'lunas')->sum('jumlah_bayar'),
+            'transaksi_pending' => Rental::where('status_pemesanan', 'pending')->count(),
+            'transaksi_berjalan' => Rental::whereIn('status_pemesanan', ['dikonfirmasi', 'berjalan'])->count(),
+            'jumlah_kendaraan' => Vehicle::count(),
+            'jumlah_pengguna' => User::where('role', 'penyewa')->count(),
+        ];
+
+        // --- Data untuk Grafik Pendapatan 6 Bulan Terakhir ---
+        $monthlyRevenue = Payment::select(
+            DB::raw('YEAR(tanggal_pembayaran) as year, MONTH(tanggal_pembayaran) as month'),
+            DB::raw('SUM(jumlah_bayar) as total')
+        )
+            ->where('status_pembayaran', 'lunas')
+            ->where('tanggal_pembayaran', '>=', Carbon::now()->subMonths(6))
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        $chartLabels = $monthlyRevenue->map(function ($item) {
+            return Carbon::createFromDate($item->year, $item->month)->format('F Y');
+        });
+
+        $chartData = $monthlyRevenue->pluck('total');
+
+        // Hentikan eksekusi dan tampilkan isi variabel di sini
+        // dd($chartLabels, $chartData);
+
+        // Baris di bawah ini tidak akan dieksekusi untuk sementara
+        return view('admin.dashboard', [
+            'stats' => $summaryData,
+            'chartLabels' => $chartLabels,
+            'chartData' => $chartData
+        ]);
+    }
+
+    /**
+     * Menyediakan data ringkasan untuk API.
+     */
+    public function summary(): JsonResponse // <-- METHOD LAMA UNTUK API TETAP ADA
     {
         // Menghitung total pendapatan dari pembayaran yang sudah lunas
         $totalRevenue = Payment::where('status_pembayaran', 'lunas')->sum('jumlah_bayar');
@@ -25,7 +71,7 @@ class DashboardController extends Controller
 
         // Menghitung jumlah transaksi yang sedang berjalan/aktif
         $ongoingRentals = Rental::whereIn('status_pemesanan', ['dikonfirmasi', 'berjalan'])->count();
-        
+
         // Menghitung jumlah total kendaraan
         $totalVehicles = Vehicle::count();
 
