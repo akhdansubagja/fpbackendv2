@@ -1,85 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f8f9fa; margin: 0; padding: 2rem; }
-        .container { max-width: 1200px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .stat-card h3 { margin-top: 0; }
-        .chart-container { background: white; padding: 2rem; margin-top: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .logout-btn { background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Admin Dashboard</h1>
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        </div>
+@extends('layouts.admin')
 
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total Pendapatan</h3>
-                <p>Rp {{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Transaksi Pending</h3>
-                <p>{{ $stats['transaksi_pending'] }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Transaksi Berjalan</h3>
-                <p>{{ $stats['transaksi_berjalan'] }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Jumlah Kendaraan</h3>
-                <p>{{ $stats['jumlah_kendaraan'] }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Jumlah Pengguna</h3>
-                <p>{{ $stats['jumlah_pengguna'] }}</p>
+{{-- Mengatur Judul Halaman --}}
+@section('title', 'Admin Dashboard')
+
+{{-- Konten Utama Halaman --}}
+@section('content')
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Dashboard</h1>
+    </div>
+
+    <p>Selamat datang kembali, {{ Auth::user()->name }}!</p>
+
+    {{-- Kartu Statistik --}}
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Pendapatan</h5>
+                    <p class="card-text fs-4">Rp {{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</p>
+                </div>
             </div>
         </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Transaksi Pending</h5>
+                    <p class="card-text fs-4">{{ $stats['transaksi_pending'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Transaksi Berjalan</h5>
+                    <p class="card-text fs-4">{{ $stats['transaksi_berjalan'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Jumlah Kendaraan</h5>
+                    <p class="card-text fs-4">{{ $stats['jumlah_kendaraan'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Jumlah Pengguna</h5>
+                    <p class="card-text fs-4">{{ $stats['jumlah_pengguna'] }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="chart-container">
-            <h3>Pendapatan 6 Bulan Terakhir</h3>
+    {{-- Kontainer untuk Grafik --}}
+    <div class="card mt-4">
+        <div class="card-header">
+            Pendapatan 6 Bulan Terakhir
+        </div>
+        <div class="card-body">
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
-    
-    <script>
-        const ctx = document.getElementById('revenueChart');
-        const chartLabels = @json($chartLabels);
-        const chartData = @json($chartData);
+@endsection
 
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: 'Pendapatan (Rp)',
-                    data: chartData,
-                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+{{-- Script Khusus untuk Halaman Ini --}}
+@push('scripts')
+<script>
+    // Kode JavaScript untuk Chart.js tetap sama persis
+    const ctx = document.getElementById('revenueChart');
+    const chartLabels = @json($chartLabels);
+    const chartData = @json($chartData);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Pendapatan (Rp)',
+                data: chartData,
+                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+</script>
+@endpush

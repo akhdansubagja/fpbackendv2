@@ -25,6 +25,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::resource('vehicles', VehiclePageController::class)->except(['show']); // Menggunakan except() lebih rapi
+        // Route baru khusus untuk update status kendaraan
+        Route::patch('/vehicles/{vehicle}/update-status', [VehiclePageController::class, 'updateStatus'])->name('vehicles.updateStatus');
+        Route::delete('/gallery-images/{id}', [VehiclePageController::class, 'destroyImage'])->name('vehicles.destroyImage');
 
         // Route untuk halaman manajemen rental
         Route::get('/rentals', [RentalPageController::class, 'index'])->name('rentals.index');

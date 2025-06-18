@@ -4,17 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
+use App\Models\VehicleImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UpdateVehicleRequest;
 
 class VehiclePageController extends Controller
 {
-    /**
-     * Menampilkan halaman daftar kendaraan.
-     */
     public function index()
     {
-        $vehicles = Vehicle::latest()->get();
+        $vehicles = Vehicle::with('images')->latest()->get();
         return view('admin.vehicles.index', ['vehicles' => $vehicles]);
     }
 
@@ -23,12 +22,9 @@ class VehiclePageController extends Controller
         return view('admin.vehicles.create');
     }
 
-    /**
-     * Menyimpan data kendaraan baru dari form.
-     */
     public function store(Request $request)
     {
-        // Validasi data (untuk simple, kita bisa letakkan di sini)
+        // 1. Validasi data, termasuk gallery_images
         $validatedData = $request->validate([
             'merk' => 'required|string|max:255',
             'nama' => 'required|string|max:255',
@@ -38,81 +34,80 @@ class VehiclePageController extends Controller
             'has_ac' => 'required|boolean',
             'harga_sewa_harian' => 'required|numeric|min:0',
             'deskripsi' => 'required|string',
-            'foto_utama' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'foto_utama' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'gallery_images' => 'nullable|array', // Validasi untuk galeri
+            'gallery_images.*' => 'image|mimes:jpeg,png,jpg|max:2048' // Validasi setiap file
         ]);
         
-        // Tambahkan status default
         $validatedData['status'] = 'tersedia';
 
-        // Proses upload file
         if ($request->hasFile('foto_utama')) {
             $path = $request->file('foto_utama')->store('public/vehicles/main');
             $validatedData['foto_utama'] = Storage::url($path);
         }
 
-        // Simpan ke database
-        Vehicle::create($validatedData);
+        // 2. Simpan data kendaraan utama terlebih dahulu
+        $vehicle = Vehicle::create($validatedData);
 
-        // Arahkan kembali ke halaman daftar kendaraan dengan pesan sukses
+        // 3. Logika baru untuk menyimpan foto galeri
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $imageFile) {
+                $path = $imageFile->store('public/vehicles/gallery');
+                // Buat entri baru di tabel vehicle_images yang terhubung dengan kendaraan ini
+                $vehicle->images()->create(['path' => Storage::url($path)]);
+            }
+        }
+
         return redirect()->route('admin.vehicles.index')->with('success', 'Kendaraan baru berhasil ditambahkan!');
     }
 
-    /**
-     * Menampilkan form untuk mengedit kendaraan.
-     */
     public function edit(string $id)
     {
-        $vehicle = Vehicle::findOrFail($id);
+        $vehicle = Vehicle::with('images')->findOrFail($id);
         return view('admin.vehicles.edit', ['vehicle' => $vehicle]);
     }
 
     /**
      * Memperbarui data kendaraan di database.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateVehicleRequest $request, string $id)
     {
         $vehicle = Vehicle::findOrFail($id);
-
-        $validatedData = $request->validate([
-            'merk' => 'required|string|max:255',
-            'nama' => 'required|string|max:255',
-            'transmisi' => 'required|in:manual,matic',
-            'jumlah_kursi' => 'required|integer|min:1',
-            'bahan_bakar' => 'required|in:bensin,diesel,listrik,hybrid',
-            'has_ac' => 'required|boolean',
-            'harga_sewa_harian' => 'required|numeric|min:0',
-            'deskripsi' => 'required|string',
-            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Foto tidak wajib diisi saat update
-        ]);
+        
+        // Ambil data yang sudah divalidasi oleh UpdateVehicleRequest
+        $validatedData = $request->validated();
 
         if ($request->hasFile('foto_utama')) {
-            // Hapus foto lama
             if ($vehicle->foto_utama) {
                 Storage::delete(str_replace('/storage', 'public', $vehicle->foto_utama));
             }
-            // Simpan foto baru
             $path = $request->file('foto_utama')->store('public/vehicles/main');
             $validatedData['foto_utama'] = Storage::url($path);
         }
+        
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $imageFile) {
+                $path = $imageFile->store('public/vehicles/gallery');
+                $vehicle->images()->create(['path' => Storage::url($path)]);
+            }
+        }
+        
+        // Hapus key 'gallery_images' dari array sebelum update
+        unset($validatedData['gallery_images']);
 
         $vehicle->update($validatedData);
 
         return redirect()->route('admin.vehicles.index')->with('success', 'Data kendaraan berhasil diperbarui!');
     }
 
-    /**
-     * Menghapus data kendaraan dari database.
-     */
     public function destroy(string $id)
     {
         $vehicle = Vehicle::with('images')->findOrFail($id);
 
-        // Hapus foto utama
         if ($vehicle->foto_utama) {
             Storage::delete(str_replace('/storage', 'public', $vehicle->foto_utama));
         }
 
-        // Hapus semua foto di galeri
         foreach ($vehicle->images as $image) {
             Storage::delete(str_replace('/storage', 'public', $image->path));
         }
@@ -120,5 +115,34 @@ class VehiclePageController extends Controller
         $vehicle->delete();
 
         return redirect()->route('admin.vehicles.index')->with('success', 'Data kendaraan berhasil dihapus!');
+    }
+
+    public function destroyImage(string $id)
+    {
+        $image = VehicleImage::findOrFail($id);
+        
+        Storage::delete(str_replace('/storage', 'public', $image->path));
+        
+        $image->delete();
+
+        return back()->with('success', 'Gambar galeri berhasil dihapus.');
+    }
+
+    /**
+     * Memperbarui status kendaraan secara spesifik.
+     */
+    /**
+     * Memperbarui status kendaraan secara spesifik.
+     */
+    public function updateStatus(Request $request, Vehicle $vehicle)
+    {
+        // Izinkan status 'disewa' di dalam validasi
+        $request->validate([
+            'status' => 'required|in:tersedia,servis,disewa',
+        ]);
+
+        $vehicle->update(['status' => $request->status]);
+
+        return redirect()->route('admin.vehicles.index')->with('success', 'Status kendaraan berhasil diperbarui.');
     }
 }

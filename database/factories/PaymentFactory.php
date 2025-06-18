@@ -22,7 +22,7 @@ class PaymentFactory extends Factory
             'status_deposit' => 'ditahan',
             'metode_pembayaran' => 'transfer',
             'jumlah_bayar' => fake()->numberBetween(30, 100) * 10000,
-            'tanggal_pembayaran' => now(),
+            'tanggal_pembayaran' => '2025-04-18 14:30:00',
             'bukti_pembayaran' => 'payments/dummy_proof.jpg',
             'status_pembayaran' => fake()->randomElement(['pending', 'lunas']),
         ];

@@ -1,140 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Pemesanan</title>
-    {{-- Menggunakan style yang sama dengan halaman vehicles --}}
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 2rem;
-        }
+@section('title', 'Manajemen Pemesanan')
 
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+@section('content')
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Manajemen Pemesanan</h1>
+    </div>
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn {
-            background-color: #28a745;
-            color: white;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-            text-align: left;
-        }
-
-        th {
-            background-color: #e9ecef;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Manajemen Pemesanan</h1>
-        </div>
-
-        @if(session('success'))
-            <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <table>
-            <thead>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
                 <tr>
-                    <th>ID</th>
-                    <th>Penyewa</th>
-                    <th>Kendaraan</th>
-                    <th>Waktu Sewa</th>
-                    <th>Waktu Kembali</th>
-                    <th>Total Harga</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
+                    <th scope="col">#</th>
+                    <th scope="col">Nama Penyewa</th>
+                    <th scope="col">Kendaraan</th>
+                    <th scope="col">Tanggal Sewa</th>
+                    <th scope="col">Status Pemesanan</th>
+                    <th scope="col">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($rentals as $rental)
-                    <tr>
-                        <td>{{ $rental->id }}</td>
-                        <td>{{ $rental->user->name }}</td>
-                        <td>{{ $rental->vehicle->merk }} {{ $rental->vehicle->nama }}</td>
-                        <td>{{ $rental->waktu_sewa }}</td>
-                        <td>{{ $rental->waktu_kembali }}</td>
-                        <td>Rp {{ number_format($rental->total_harga, 0, ',', '.') }}</td>
-                        <td>{{ $rental->status_pemesanan }}</td>
-                        {{-- Ganti seluruh isi <td> untuk kolom "Aksi" --}}
-                        <td>
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <a href="{{ route('admin.rentals.show', $rental->id) }}"
-                                    style="text-decoration: none; padding: 0.4rem; background-color: #17a2b8; color: white; text-align: center; border-radius: 4px;">Lihat
-                                    Detail</a>
-
-                                @if($rental->status_pemesanan == 'pending')
-                                    <div style="display: flex; gap: 0.5rem;">
-                                        {{-- Form untuk Konfirmasi --}}
-                                        <form action="{{ route('admin.rentals.update-status', $rental->id) }}" method="POST"
-                                            style="flex: 1;">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status_pemesanan" value="dikonfirmasi">
-                                            <button type="submit" class="btn">Konfirmasi</button>
-                                        </form>
-                                        {{-- Form untuk Tolak --}}
-                                        <form action="{{ route('admin.rentals.update-status', $rental->id) }}" method="POST"
-                                            style="flex: 1;">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status_pemesanan" value="ditolak">
-                                            <button type="submit" class="btn btn-danger">Tolak</button>
-                                        </form>
-                                    </div>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" style="text-align: center;">Tidak ada data pemesanan.</td>
-                    </tr>
-                @endforelse
-            </tbody>
+    @forelse ($rentals as $rental)
+        <tr>
+            <th scope="row">{{ $rental->id }}</th>
+            <td>{{ $rental->user->name }}</td>
+            <td>{{ $rental->vehicle->merk }} {{ $rental->vehicle->nama }}</td>
+            <td>{{ \Carbon\Carbon::parse($rental->waktu_sewa)->format('d M Y, H:i') }}</td>
+            <td>
+                {{-- Logika baru untuk menampilkan badge status --}}
+                @php
+                    $statusClass = '';
+                    switch ($rental->status_pemesanan) {
+                        case 'pending': $statusClass = 'bg-warning text-dark'; break;
+                        case 'dikonfirmasi': $statusClass = 'bg-info text-dark'; break;
+                        case 'berjalan': $statusClass = 'bg-success'; break;
+                        case 'selesai': $statusClass = 'bg-primary'; break;
+                        case 'dibatalkan': case 'ditolak': $statusClass = 'bg-danger'; break;
+                        default: $statusClass = 'bg-secondary';
+                    }
+                @endphp
+                <span class="badge {{ $statusClass }}">{{ $rental->status_pemesanan }}</span>
+            </td>
+            <td>
+                {{-- Form dan tombol aksi yang selalu terlihat --}}
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ route('admin.rentals.show', $rental->id) }}" class="btn btn-sm btn-info" title="Lihat Detail">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    
+                    <form action="{{ route('admin.rentals.update-status', $rental->id) }}" method="POST" class="d-inline-flex gap-1">
+                        @csrf
+                        @method('PATCH')
+                        <select name="status_pemesanan" class="form-select form-select-sm" style="width: 120px;">
+                            <option value="pending" {{ $rental->status_pemesanan == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="dikonfirmasi" {{ $rental->status_pemesanan == 'dikonfirmasi' ? 'selected' : '' }}>Dikonfirmasi</option>
+                            <option value="berjalan" {{ $rental->status_pemesanan == 'berjalan' ? 'selected' : '' }}>Berjalan</option>
+                            <option value="selesai" {{ $rental->status_pemesanan == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                            <option value="ditolak" {{ $rental->status_pemesanan == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Go</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="6" class="text-center">Tidak ada data pemesanan.</td>
+        </tr>
+    @endforelse
+</tbody>
         </table>
     </div>
-</body>
-
-</html>
+@endsection

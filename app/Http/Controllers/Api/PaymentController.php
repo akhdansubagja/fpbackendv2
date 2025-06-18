@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadProofRequest;
 use App\Models\Payment;
+use App\Models\User; // <-- Tambahkan ini
+use App\Models\Notification; // <-- Tambahkan ini
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,26 +18,34 @@ class PaymentController extends Controller
     public function uploadProof(UploadProofRequest $request, Payment $payment): JsonResponse
     {
         // PENTING: Pengecekan Otorisasi
-        // Pastikan pengguna yang login adalah pemilik dari rental yang terkait dengan pembayaran ini.
         if ($request->user()->id !== $payment->rental->user_id) {
             return response()->json(['message' => 'Akses ditolak.'], 403);
         }
 
-        // Ambil file yang sudah divalidasi
         $file = $request->file('bukti_pembayaran');
 
-        // Hapus bukti pembayaran lama jika ada
         if ($payment->bukti_pembayaran) {
-            Storage::delete(str_replace('/storage', 'public', $payment->bukti_pembayaran));
+            Storage::delete(str_replace(Storage::url(''), 'public', $payment->bukti_pembayaran));
         }
 
-        // Simpan file baru dan dapatkan path-nya
         $path = $file->store('public/payments/proofs');
-        
-        // Update kolom di database dengan path ke file baru
+
         $payment->update([
             'bukti_pembayaran' => Storage::url($path)
         ]);
+
+        // === BAGIAN BARU: BUAT NOTIFIKASI UNTUK ADMIN ===
+        $admins = User::where('role', 'admin')->get();
+        $penyewa = $payment->rental->user; // Mengambil data penyewa dari relasi
+
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'title' => 'Bukti Pembayaran Diunggah',
+                'message' => "Bukti bayar untuk sewa #{$payment->rental_id} oleh {$penyewa->name} telah diunggah."
+            ]);
+        }
+        // === AKHIR BAGIAN BARU ===
 
         return response()->json([
             'success' => true,
@@ -43,4 +53,5 @@ class PaymentController extends Controller
             'data' => $payment
         ]);
     }
+
 }

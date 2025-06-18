@@ -67,6 +67,11 @@
                 <label for="foto_utama">Foto Utama (Thumbnail)</label>
                 <input type="file" id="foto_utama" name="foto_utama" required>
             </div>
+            {{-- INPUT BARU UNTUK GALERI --}}
+            <div class="form-group">
+                <label for="gallery_images">Foto Galeri (Bisa pilih lebih dari satu)</label>
+                <input type="file" class="form-control" id="gallery_images" name="gallery_images[]" multiple>
+            </div>
             
             <button type="submit" class="btn">Simpan Kendaraan</button>
             <a href="{{ route('admin.vehicles.index') }}" class="btn btn-secondary">Batal</a>
