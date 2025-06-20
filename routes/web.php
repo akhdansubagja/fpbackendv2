@@ -40,6 +40,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Route untuk halaman notifikasi
         Route::get('/notifications', [NotificationPageController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/unread-count', [NotificationPageController::class, 'getUnreadCount'])->name('notifications.unreadCount');
+        Route::get('/notifications/{notification}/read', [NotificationPageController::class, 'readAndRedirect'])->name('notifications.read');
+        // --- AKHIR TAMBAHAN ---
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // <-- Tambahkan ini

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadProofRequest;
 use App\Models\Payment;
-use App\Models\User; // <-- Tambahkan ini
-use App\Models\Notification; // <-- Tambahkan ini
+use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +17,6 @@ class PaymentController extends Controller
      */
     public function uploadProof(UploadProofRequest $request, Payment $payment): JsonResponse
     {
-        // PENTING: Pengecekan Otorisasi
         if ($request->user()->id !== $payment->rental->user_id) {
             return response()->json(['message' => 'Akses ditolak.'], 403);
         }
@@ -34,18 +33,19 @@ class PaymentController extends Controller
             'bukti_pembayaran' => Storage::url($path)
         ]);
 
-        // === BAGIAN BARU: BUAT NOTIFIKASI UNTUK ADMIN ===
         $admins = User::where('role', 'admin')->get();
-        $penyewa = $payment->rental->user; // Mengambil data penyewa dari relasi
+        $penyewa = $payment->rental->user;
+        $rental = $payment->rental; // Ambil objek rental
 
         foreach ($admins as $admin) {
             Notification::create([
                 'user_id' => $admin->id,
                 'title' => 'Bukti Pembayaran Diunggah',
-                'message' => "Bukti bayar untuk sewa #{$payment->rental_id} oleh {$penyewa->name} telah diunggah."
+                'message' => "Bukti bayar untuk sewa #{$rental->id} oleh {$penyewa->name} telah diunggah.",
+                // --- TAMBAHAN: Sertakan link ke detail pesanan ---
+                'link' => route('admin.rentals.show', $rental->id)
             ]);
         }
-        // === AKHIR BAGIAN BARU ===
 
         return response()->json([
             'success' => true,
@@ -53,5 +53,4 @@ class PaymentController extends Controller
             'data' => $payment
         ]);
     }
-
 }

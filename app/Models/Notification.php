@@ -19,6 +19,7 @@ class Notification extends Model
         'title',
         'message',
         'is_read',
+        'link', // <-- TAMBAHKAN BARIS INI
     ];
 
     // --- RELASI ---

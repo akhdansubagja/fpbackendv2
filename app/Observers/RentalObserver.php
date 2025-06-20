@@ -19,42 +19,18 @@ class RentalObserver
         // Buat notifikasi untuk setiap admin
         foreach ($admins as $admin) {
             Notification::create([
-                'user_id' => $admin->id, // Notifikasi ini untuk admin
+                'user_id' => $admin->id,
                 'title' => 'Pemesanan Baru Diterima',
                 'message' => "Pemesanan baru dengan ID #{$rental->id} telah dibuat oleh {$rental->user->name}.",
+                // --- TAMBAHAN: Sertakan link ke detail pesanan ---
+                'link' => route('admin.rentals.show', $rental->id)
             ]);
         }
     }
 
-    /**
-     * Handle the Rental "updated" event.
-     */
-    public function updated(Rental $rental): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Rental "deleted" event.
-     */
-    public function deleted(Rental $rental): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Rental "restored" event.
-     */
-    public function restored(Rental $rental): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Rental "force deleted" event.
-     */
-    public function forceDeleted(Rental $rental): void
-    {
-        //
-    }
+    // ... (sisa method tidak perlu diubah) ...
+    public function updated(Rental $rental): void { }
+    public function deleted(Rental $rental): void { }
+    public function restored(Rental $rental): void { }
+    public function forceDeleted(Rental $rental): void { }
 }
