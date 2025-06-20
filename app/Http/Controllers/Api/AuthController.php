@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth; // <-- Tambahkan ini jika belum ada
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -20,21 +20,26 @@ class AuthController extends Controller
         // Validasi input dari user
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'nomor_telepon' => 'required|string|max:15',
+            // --- PERUBAHAN DI SINI ---
+            // Menambahkan aturan 'unique:users,nomor_telepon' untuk memastikan nomor telepon tidak terdaftar
+            'nomor_telepon' => 'required|string|max:15|unique:users,nomor_telepon',
             'path_sim' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'tanggal_lahir' => 'required|date',
             'alamat' => 'required|string',
         ]);
 
+        // Jika validasi gagal, kembalikan response JSON dengan daftar error yang spesifik.
+        // Kode ini sudah benar dan tidak perlu diubah.
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         // Mengelola upload file SIM
         $path_sim = null;
         if ($request->hasFile('path_sim')) {
+            // Menggunakan store() akan menghasilkan nama file unik secara otomatis
             $path_sim = $request->file('path_sim')->store('public/sims');
         }
 
@@ -76,7 +81,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         // Coba untuk melakukan autentikasi
@@ -110,5 +115,4 @@ class AuthController extends Controller
             ]
         ], 200);
     }
-
 }
