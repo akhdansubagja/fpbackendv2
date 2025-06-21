@@ -30,6 +30,7 @@ class UpdateVehicleRequest extends FormRequest
             'bahan_bakar' => ['sometimes', Rule::in(['bensin', 'diesel', 'listrik', 'hybrid'])],
             'has_ac' => 'sometimes|boolean',
             'harga_sewa_harian' => 'sometimes|numeric|min:0',
+            'security_deposit' => 'required|numeric|min:0', // <-- TAMBAHKAN BARIS INI
             'deskripsi' => 'sometimes|string',
             'status' => ['sometimes', Rule::in(['tersedia', 'disewa', 'servis'])],
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',

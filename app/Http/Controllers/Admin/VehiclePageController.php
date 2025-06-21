@@ -33,6 +33,7 @@ class VehiclePageController extends Controller
             'bahan_bakar' => 'required|in:bensin,diesel,listrik,hybrid',
             'has_ac' => 'required|boolean',
             'harga_sewa_harian' => 'required|numeric|min:0',
+            'security_deposit' => 'required|numeric|min:0', // <-- TAMBAHKAN
             'deskripsi' => 'required|string',
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'gallery_images' => 'nullable|array', // Validasi untuk galeri

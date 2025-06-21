@@ -10,15 +10,16 @@ class Vehicle extends Model
     use HasFactory;
 
     protected $fillable = [
-        'merk', // Diubah
+        'merk',
         'nama',
         'transmisi',
-        'jumlah_kursi', // Baru
-        'bahan_bakar',  // Baru
-        'has_ac',       // Baru
+        'jumlah_kursi',
+        'bahan_bakar',
+        'has_ac',
         'harga_sewa_harian',
+        'security_deposit', // <-- TAMBAHKAN INI
         'deskripsi',
-        'foto_utama',   // Diubah
+        'foto_utama',
         'status',
     ];
 
@@ -28,11 +29,8 @@ class Vehicle extends Model
     {
         return $this->hasMany(Rental::class);
     }
-
-    /**
-     * Vehicle memiliki banyak gambar galeri.
-     */
-    public function images() // <-- Relasi Baru
+    
+    public function images()
     {
         return $this->hasMany(VehicleImage::class);
     }

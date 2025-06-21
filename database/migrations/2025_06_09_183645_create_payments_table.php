@@ -13,7 +13,6 @@ return new class extends Migration {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rental_id')->unique()->constrained('rentals')->onDelete('cascade');
-            $table->decimal('security_deposit', 10, 2)->default(0); // Tambahan baru
             $table->enum('status_deposit', ['ditahan', 'dikembalikan', 'dipotong'])->default('ditahan'); // Tambahan baru
             $table->enum('metode_pembayaran', ['transfer', 'qris', 'bayar_di_tempat']);
             $table->decimal('jumlah_bayar', 10, 2);

@@ -33,6 +33,10 @@
                 <input type="number" id="harga_sewa_harian" name="harga_sewa_harian" required>
             </div>
             <div class="form-group">
+                <label for="security_deposit">Security Deposit</label>
+                <input type="number" id="security_deposit" name="security_deposit" required value="0">
+            </div>
+            <div class="form-group">
                 <label for="jumlah_kursi">Jumlah Kursi</label>
                 <input type="number" id="jumlah_kursi" name="jumlah_kursi" required>
             </div>
