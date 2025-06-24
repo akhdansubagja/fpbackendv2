@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule; // <-- Pastikan ini ada di atas
 
 class StoreRentalRequest extends FormRequest
 {
@@ -17,6 +18,8 @@ class StoreRentalRequest extends FormRequest
             'vehicle_id' => 'required|exists:vehicles,id',
             'waktu_sewa' => 'required|date|after_or_equal:today',
             'waktu_kembali' => 'required|date|after:waktu_sewa',
+            'delivery_option' => ['required', Rule::in(['pickup', 'delivered'])],
+            'delivery_address' => ['nullable', 'required_if:delivery_option,delivered', 'string', 'max:255'],
         ];
     }
 }

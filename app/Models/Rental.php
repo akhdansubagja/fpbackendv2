@@ -16,6 +16,9 @@ class Rental extends Model
         'waktu_kembali',    // Diubah
         'total_harga',
         'status_pemesanan',
+        'delivery_option',
+        'delivery_address',
+        'delivery_fee',
     ];
 
     // ... (Relasi tidak berubah) ...

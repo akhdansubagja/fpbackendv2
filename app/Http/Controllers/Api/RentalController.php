@@ -11,6 +11,9 @@ use Carbon\Carbon;
 
 class RentalController extends Controller
 {
+    // PERUBAHAN: Menggunakan biaya antar tetap (flat fee)
+    private const FLAT_DELIVERY_FEE = 150000;
+
     /**
      * Menyimpan data pemesanan baru dari pengguna.
      */
@@ -19,43 +22,43 @@ class RentalController extends Controller
         $validatedData = $request->validated();
         $user = $request->user();
 
-        // Ambil data kendaraan untuk menghitung harga
         $vehicle = Vehicle::findOrFail($validatedData['vehicle_id']);
 
-        // Kalkulasi durasi sewa dalam hari
         $waktuSewa = Carbon::parse($validatedData['waktu_sewa']);
         $waktuKembali = Carbon::parse($validatedData['waktu_kembali']);
         $durasiHari = $waktuSewa->diffInDays($waktuKembali);
-        
-        // Pastikan durasi minimal 1 hari
-        if ($durasiHari < 1) {
-            $durasiHari = 1;
-        }
+        $durasiHari = $durasiHari < 1 ? 1 : $durasiHari;
 
-        // Kalkulasi total harga
-        $totalHarga = $durasiHari * $vehicle->harga_sewa_harian;
+        // --- LOGIKA BARU: HITUNG DELIVERY FEE (FLAT) ---
+        $deliveryFee = 0;
+        if (isset($validatedData['delivery_option']) && $validatedData['delivery_option'] === 'delivered') {
+            // Biaya antar sekarang tidak dikalikan dengan hari
+            $deliveryFee = self::FLAT_DELIVERY_FEE;
+        }
+        // --- AKHIR LOGIKA BARU ---
+
+        $hargaSewaMobil = $durasiHari * $vehicle->harga_sewa_harian;
+        $totalHarga = $hargaSewaMobil + $deliveryFee;
         
-        // Tambahkan user_id dan total_harga ke data yang akan disimpan
         $validatedData['user_id'] = $user->id;
         $validatedData['total_harga'] = $totalHarga;
-        $validatedData['status_pemesanan'] = 'pending'; // Status awal
+        $validatedData['delivery_fee'] = $deliveryFee;
+        $validatedData['status_pemesanan'] = 'pending';
 
-        // Simpan data rental
         $rental = $user->rentals()->create($validatedData);
 
-        // Buat data payment yang terhubung dengan rental ini
         $rental->payment()->create([
             'jumlah_bayar' => $totalHarga,
-            'security_deposit' => 200000, // Contoh security deposit
+            'security_deposit' => $vehicle->security_deposit ?? 0, // Menggunakan null coalescing operator
             'status_pembayaran' => 'pending',
             'status_deposit' => 'ditahan',
-            'metode_pembayaran' => 'transfer' // Default, bisa diubah nanti
+            'metode_pembayaran' => 'transfer'
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Pemesanan Anda berhasil dibuat dan sedang menunggu konfirmasi.',
-            'data' => $rental->load('payment') // Muat data payment dalam respons
+            'data' => $rental->load('payment')
         ], 201);
     }
 

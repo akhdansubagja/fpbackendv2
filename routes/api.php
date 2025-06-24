@@ -45,6 +45,9 @@ Route::get('/vehicles', [UserVehicleController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserAuthController::class, 'logout']);
 
+    // Route untuk mengganti password
+    Route::post('/change-password', [UserAuthController::class, 'changePassword']);
+
     // Route untuk membuat pemesanan baru
     Route::post('/rentals', [UserRentalController::class, 'store']);
 

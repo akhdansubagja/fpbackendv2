@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password; // <-- Impor ini
 
 class AuthController extends Controller
 {
@@ -113,6 +114,48 @@ class AuthController extends Controller
                 'access_token' => $token,
                 'token_type' => 'Bearer',
             ]
+        ], 200);
+    }
+
+    // --- METHOD BARU UNTUK UBAH PASSWORD ---
+    public function changePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // 1. Validasi input
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => ['required', 'string', 'confirmed', Password::min(8)],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // 2. Cek apakah password saat ini cocok
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password saat ini yang Anda masukkan salah.'
+            ], 422);
+        }
+
+        // 3. Cek apakah password baru sama dengan password lama
+        if (Hash::check($request->new_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password baru tidak boleh sama dengan password lama.'
+            ], 422);
+        }
+
+        // 4. Update password
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password Anda berhasil diperbarui.'
         ], 200);
     }
 }
