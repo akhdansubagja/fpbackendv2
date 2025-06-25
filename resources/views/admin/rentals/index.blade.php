@@ -22,7 +22,7 @@
             <tbody>
     @forelse ($rentals as $rental)
         <tr>
-            <th scope="row">{{ $rental->id }}</th>
+            <th scope="row">#GR{{ $rental->id }}</th>
             <td>{{ $rental->user->name }}</td>
             <td>{{ $rental->vehicle->merk }} {{ $rental->vehicle->nama }}</td>
             <td>{{ \Carbon\Carbon::parse($rental->waktu_sewa)->format('d M Y, H:i') }}</td>

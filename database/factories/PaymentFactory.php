@@ -18,7 +18,7 @@ class PaymentFactory extends Factory
     {
         return [
             // rental_id akan kita isi dari seeder
-            'security_deposit' => fake()->randomElement([0, 200000, 500000]),
+            
             'status_deposit' => 'ditahan',
             'metode_pembayaran' => 'transfer',
             'jumlah_bayar' => fake()->numberBetween(30, 100) * 10000,

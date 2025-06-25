@@ -29,9 +29,11 @@ class Vehicle extends Model
     {
         return $this->hasMany(Rental::class);
     }
-    
+
     public function images()
     {
         return $this->hasMany(VehicleImage::class);
     }
+
+
 }

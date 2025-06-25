@@ -41,7 +41,7 @@ class AuthController extends Controller
         $path_sim = null;
         if ($request->hasFile('path_sim')) {
             // Menggunakan store() akan menghasilkan nama file unik secara otomatis
-            $path_sim = $request->file('path_sim')->store('public/sims');
+            $path_sim = $request->file('path_sim')->store('sims', 'public');
         }
 
         // Membuat user baru
@@ -133,7 +133,7 @@ class AuthController extends Controller
         }
 
         // 2. Cek apakah password saat ini cocok
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (!Hash::check($request->current_password, (string) $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Password saat ini yang Anda masukkan salah.'
@@ -141,7 +141,7 @@ class AuthController extends Controller
         }
 
         // 3. Cek apakah password baru sama dengan password lama
-        if (Hash::check($request->new_password, $user->password)) {
+        if (Hash::check($request->new_password, (string) $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Password baru tidak boleh sama dengan password lama.'

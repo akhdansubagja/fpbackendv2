@@ -47,14 +47,46 @@ class DashboardController extends Controller
 
         $chartData = $monthlyRevenue->pluck('total');
 
-        // Hentikan eksekusi dan tampilkan isi variabel di sini
-        // dd($chartLabels, $chartData);
+
+        // 2. Data Kendaraan Terlaris (PERBAIKAN)
+        $topVehicles = DB::table('rentals')
+            ->join('vehicles', 'rentals.vehicle_id', '=', 'vehicles.id')
+            ->select('vehicles.merk', 'vehicles.nama', DB::raw('count(rentals.id) as rental_count'))
+            ->groupBy('vehicles.id', 'vehicles.merk', 'vehicles.nama')
+            ->orderByDesc('rental_count')
+            ->limit(5)
+            ->get();
+
+        // 3. Data Frekuensi Pemesanan (BARU)
+        $rentalFrequency = Rental::query()
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->where('created_at', '>=', Carbon::now()->subDays(30)) // 30 hari terakhir
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $frequencyLabels = $rentalFrequency->pluck('date')->map(function ($date) {
+            return Carbon::parse($date)->format('d M');
+        });
+        $frequencyData = $rentalFrequency->pluck('count');
+
+        // Hitung total pendapatan untuk digunakan pada view
+        $totalRevenue = Payment::where('status_pembayaran', 'lunas')->sum('jumlah_bayar');
+        // Siapkan data label dan data pendapatan untuk grafik (jika diperlukan)
+        $revenueLabels = $chartLabels;
+        $revenueData = $chartData;
 
         // Baris di bawah ini tidak akan dieksekusi untuk sementara
         return view('admin.dashboard', [
             'stats' => $summaryData,
             'chartLabels' => $chartLabels,
-            'chartData' => $chartData
+            'chartData' => $chartData,
+            'totalRevenue' => $totalRevenue,
+            'revenueLabels' => $revenueLabels,
+            'revenueData' => $revenueData,
+            'topVehicles' => $topVehicles, // Tambahkan ini
+            'frequencyLabels' => $frequencyLabels, // Tambahkan ini
+            'frequencyData' => $frequencyData, // Tambahkan ini
         ]);
     }
 

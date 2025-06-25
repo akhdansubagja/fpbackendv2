@@ -52,11 +52,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/rentals', [UserRentalController::class, 'store']);
 
     // Route baru untuk melihat riwayat pemesanan milik user yang sedang login
-    Route::get('/my-rentals', [UserRentalController::class, 'history']);
+    Route::get('/rentals/history', [UserRentalController::class, 'history']);
 
     // Route baru untuk unggah bukti pembayaran
     Route::post('/payments/{payment}/upload-proof', [UserPaymentController::class, 'uploadProof']);
     // Nanti route untuk membuat pesanan, riwayat, dll, akan diletakkan di sini
+
+    Route::get('/rentals/{rental}/status', [UserRentalController::class, 'checkStatus']);
 });
 
 

@@ -21,6 +21,7 @@ class VehicleFactory extends Factory
             'bahan_bakar' => fake()->randomElement(['bensin', 'diesel', 'listrik', 'hybrid']), // Tambahan baru
             'has_ac' => fake()->boolean(90), // Tambahan baru, 90% kemungkinan true
             'harga_sewa_harian' => fake()->numberBetween(25, 70) * 10000, // Logika harga yg lebih realistis
+            'security_deposit' => fake()->randomElement([200000, 500000]),
             'deskripsi' => fake()->paragraph(),
             'foto_utama' => 'vehicles/dummy_vehicle.jpg', // Diubah dari 'foto'
             'status' => 'tersedia',
