@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class VehicleController extends Controller
 {
@@ -40,11 +42,47 @@ class VehicleController extends Controller
             ], 200);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Data kendaraan tidak ditemukan atau tidak tersedia.'
             ], 404);
         }
+    }
+
+    /**
+     * Mengambil semua tanggal yang sudah dipesan untuk sebuah kendaraan,
+     * termasuk 2 hari masa tenggang setelahnya.
+     */
+    public function getBookedDates(Vehicle $vehicle): JsonResponse
+    {
+        $bookedDates = [];
+        $gracePeriodDays = 2; // Masa tenggang 2 hari untuk pembersihan/pengecekan
+
+        // Ambil semua rental yang relevan (bukan yang dibatalkan atau selesai lama)
+        $rentals = $vehicle->rentals()
+            ->where('status_pemesanan', '!=', 'dibatalkan')
+            ->where('waktu_kembali', '>=', Carbon::now()->subMonths(1)) // Ambil data 1 bulan ke belakang
+            ->get();
+
+        foreach ($rentals as $rental) {
+            $startDate = Carbon::parse($rental->waktu_sewa);
+            // Tambahkan masa tenggang pada tanggal kembali
+            $endDate = Carbon::parse($rental->waktu_kembali)->addDays($gracePeriodDays);
+
+            // Buat rentang tanggal dari awal sewa sampai akhir masa tenggang
+            $period = CarbonPeriod::create($startDate, $endDate);
+
+            foreach ($period as $date) {
+                // Tambahkan setiap tanggal ke dalam array dalam format Y-m-d
+                $bookedDates[] = $date->format('Y-m-d');
+            }
+        }
+
+        // Hapus duplikat tanggal dan kembalikan sebagai JSON
+        return response()->json([
+            'success' => true,
+            'data' => array_values(array_unique($bookedDates))
+        ]);
     }
 }

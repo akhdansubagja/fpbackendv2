@@ -13,6 +13,8 @@ class Payment extends Model
         'rental_id',
         'security_deposit',     // Baru
         'status_deposit',       // Baru
+        'deposit_dikembalikan', // <-- TAMBAHKAN INI
+        'deposit_dipotong',     // <-- TAMBAHKAN INI
         'metode_pembayaran',
         'jumlah_bayar',
         'tanggal_pembayaran',
@@ -21,5 +23,8 @@ class Payment extends Model
     ];
 
     // ... (Relasi tidak berubah) ...
-    public function rental() { return $this->belongsTo(Rental::class); }
+    public function rental()
+    {
+        return $this->belongsTo(Rental::class);
+    }
 }

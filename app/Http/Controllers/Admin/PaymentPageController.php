@@ -32,14 +32,47 @@ class PaymentPageController extends Controller
 
         // Update status pembayaran
         $payment->update($validated);
-        
+
         // --- LOGIKA REAKSI BERANTAI (Sesuai keputusan terakhir kita) ---
         // Jika pembayaran lunas, maka konfirmasi pesanan dan set mobil menjadi disewa
         if ($validated['status_pembayaran'] == 'lunas') {
             $payment->rental()->update(['status_pemesanan' => 'dikonfirmasi']);
-            $payment->rental->vehicle()->update(['status' => 'disewa']);
         }
 
         return redirect()->route('admin.payments.index')->with('success', 'Status pembayaran berhasil diperbarui!');
+    }
+
+    /**
+     * Memperbarui status dan jumlah pengembalian deposit.
+     */
+    public function updateDeposit(Request $request, Payment $payment)
+    {
+        // Ambil total security deposit dari kendaraan terkait
+        $totalDeposit = $payment->rental->vehicle->security_deposit;
+
+        // Validasi input dari admin
+        $validated = $request->validate([
+            'deposit_dikembalikan' => "required|numeric|min:0|max:{$totalDeposit}"
+        ]);
+
+        $refundAmount = (float) $validated['deposit_dikembalikan'];
+        $deductedAmount = $totalDeposit - $refundAmount;
+        $newStatus = 'ditahan'; // Default status
+
+        if ($refundAmount == $totalDeposit) {
+            $newStatus = 'dikembalikan';
+        } elseif ($refundAmount > 0 && $refundAmount < $totalDeposit) {
+            $newStatus = 'dipotong';
+        }
+        // Jika refundAmount adalah 0, status tetap 'ditahan'
+
+        // Update data di database
+        $payment->update([
+            'deposit_dikembalikan' => $refundAmount,
+            'deposit_dipotong' => $deductedAmount,
+            'status_deposit' => $newStatus,
+        ]);
+
+        return redirect()->route('admin.payments.index')->with('success', 'Status deposit berhasil diperbarui!');
     }
 }

@@ -38,6 +38,8 @@ Route::get('/vehicles/{id}', [UserVehicleController::class, 'show']);
 // Rute untuk melihat semua kendaraan yang tersedia
 Route::get('/vehicles', [UserVehicleController::class, 'index']);
 
+Route::get('/vehicles/{vehicle}/booked-dates', [UserVehicleController::class, 'getBookedDates']);
+
 
 // ==============================================
 // == GRUP ROUTE UNTUK USER YANG SUDAH LOGIN ==

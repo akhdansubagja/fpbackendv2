@@ -37,7 +37,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Route untuk halaman manajemen pembayaran
         Route::get('/payments', [PaymentPageController::class, 'index'])->name('payments.index');
         Route::patch('/payments/{payment}/update-status', [PaymentPageController::class, 'updateStatus'])->name('payments.update-status');
-        
+        // --- TAMBAHKAN ROUTE BARU DI BAWAH INI ---
+        Route::patch('/payments/{payment}/update-deposit', [PaymentPageController::class, 'updateDeposit'])->name('payments.update-deposit');
+
         // Route untuk halaman notifikasi
         Route::get('/notifications', [NotificationPageController::class, 'index'])->name('notifications.index');
         Route::get('/notifications/unread-count', [NotificationPageController::class, 'getUnreadCount'])->name('notifications.unreadCount');
