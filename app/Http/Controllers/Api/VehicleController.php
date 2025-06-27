@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
+use App\Models\Rental;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
@@ -14,14 +15,31 @@ class VehicleController extends Controller
     /**
      * Menampilkan daftar kendaraan yang statusnya 'tersedia'.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        // Tambahkan with('images') untuk mengambil data galeri foto
-        $vehicles = Vehicle::with('images')->where('status', 'tersedia')->latest()->get();
+        $query = Vehicle::with('images'); // Mulai query
+
+        // Jika ada parameter pickup_date dari frontend
+        if ($request->has('pickup_date')) {
+            $pickupDate = Carbon::parse($request->input('pickup_date'))->format('Y-m-d');
+
+            // Ambil semua ID mobil yang TIDAK TERSEDIA pada tanggal tersebut
+            $unavailableVehicleIds = Rental::where(function ($query) use ($pickupDate) {
+                $query->whereDate('waktu_sewa', '<=', $pickupDate)
+                    ->whereDate('waktu_kembali', '>=', $pickupDate);
+            })
+                ->where('status_pemesanan', '!=', 'dibatalkan')
+                ->pluck('vehicle_id');
+
+            // Ambil mobil yang ID-nya TIDAK ADA di dalam daftar yang tidak tersedia
+            $query->whereNotIn('id', $unavailableVehicleIds);
+        }
+
+        $vehicles = $query->latest()->get(); // Eksekusi query
 
         return response()->json([
             'success' => true,
-            'message' => 'Daftar kendaraan tersedia berhasil diambil.',
+            'message' => 'Daftar kendaraan berhasil diambil.',
             'data' => $vehicles
         ]);
     }
@@ -33,7 +51,7 @@ class VehicleController extends Controller
     {
         try {
             // Tambahkan with('images') di sini juga
-            $vehicle = Vehicle::with('images')->where('status', 'tersedia')->findOrFail($id);
+            $vehicle = Vehicle::with('images')->findOrFail($id);
 
             return response()->json([
                 'success' => true,

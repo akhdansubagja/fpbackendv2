@@ -33,11 +33,16 @@ class PaymentPageController extends Controller
         // Update status pembayaran
         $payment->update($validated);
 
-        // --- LOGIKA REAKSI BERANTAI (Sesuai keputusan terakhir kita) ---
-        // Jika pembayaran lunas, maka konfirmasi pesanan dan set mobil menjadi disewa
+        // --- LOGIKA REAKSI BERANTAI YANG DIPERBARUI ---
         if ($validated['status_pembayaran'] == 'lunas') {
+            // Jika lunas, konfirmasi pesanan
             $payment->rental()->update(['status_pemesanan' => 'dikonfirmasi']);
+
+        } elseif ($validated['status_pembayaran'] == 'gagal') {
+            // JIKA GAGAL, MAKA BATALKAN PESANAN
+            $payment->rental()->update(['status_pemesanan' => 'dibatalkan']);
         }
+        // Jika statusnya 'pending', kita tidak melakukan apa-apa pada status pemesanan.
 
         return redirect()->route('admin.payments.index')->with('success', 'Status pembayaran berhasil diperbarui!');
     }

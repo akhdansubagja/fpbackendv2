@@ -57,6 +57,7 @@
                             <option value="berjalan" {{ $rental->status_pemesanan == 'berjalan' ? 'selected' : '' }}>Berjalan</option>
                             <option value="selesai" {{ $rental->status_pemesanan == 'selesai' ? 'selected' : '' }}>Selesai</option>
                             <option value="ditolak" {{ $rental->status_pemesanan == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                            <option value="dibatalkan" {{ $rental->status_pemesanan == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                         </select>
                         <button type="submit" class="btn btn-sm btn-outline-primary">Go</button>
                     </form>

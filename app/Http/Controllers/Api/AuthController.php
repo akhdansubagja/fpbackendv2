@@ -29,6 +29,7 @@ class AuthController extends Controller
             'path_sim' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'tanggal_lahir' => 'required|date',
             'alamat' => 'required|string',
+            'nomor_rekening' => 'required|string|max:50',
         ]);
 
         // Jika validasi gagal, kembalikan response JSON dengan daftar error yang spesifik.
@@ -53,6 +54,7 @@ class AuthController extends Controller
             'path_sim' => $path_sim,
             'tanggal_lahir' => $request->tanggal_lahir,
             'alamat' => $request->alamat,
+            'nomor_rekening' => $request->nomor_rekening,
             'role' => 'penyewa', // Otomatis set role sebagai penyewa
         ]);
 

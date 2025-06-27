@@ -25,6 +25,7 @@ class User extends Authenticatable
         'path_sim',
         'tanggal_lahir',
         'alamat',
+        'nomor_rekening',
         'role',
     ];
 
