@@ -55,7 +55,7 @@ class AuthController extends Controller
             'tanggal_lahir' => $request->tanggal_lahir,
             'alamat' => $request->alamat,
             'nomor_rekening' => $request->nomor_rekening,
-            'role' => 'penyewa', // Otomatis set role sebagai penyewa
+            'role' => 'penyewa',
         ]);
 
         // Membuat token untuk user yang baru mendaftar
@@ -119,7 +119,6 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // --- METHOD BARU UNTUK UBAH PASSWORD ---
     public function changePassword(Request $request): JsonResponse
     {
         $user = $request->user();

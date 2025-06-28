@@ -45,6 +45,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/notifications/unread-count', [NotificationPageController::class, 'getUnreadCount'])->name('notifications.unreadCount');
         Route::get('/notifications/{notification}/read', [NotificationPageController::class, 'readAndRedirect'])->name('notifications.read');
         // --- AKHIR TAMBAHAN ---
+
+        // --- TAMBAHAN: Route untuk Manajemen Pengguna ---
+        Route::get('/users', [\App\Http\Controllers\Admin\UserPageController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [\App\Http\Controllers\Admin\UserPageController::class, 'show'])->name('users.show');
+        Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserPageController::class, 'destroy'])->name('users.destroy');
+        // --- AKHIR TAMBAHAN ---
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // <-- Tambahkan ini

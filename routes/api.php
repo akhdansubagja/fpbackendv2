@@ -58,7 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Route baru untuk unggah bukti pembayaran
     Route::post('/payments/{payment}/upload-proof', [UserPaymentController::class, 'uploadProof']);
-    // Nanti route untuk membuat pesanan, riwayat, dll, akan diletakkan di sini
 
     Route::get('/rentals/{rental}/status', [UserRentalController::class, 'checkStatus']);
 });
@@ -70,7 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('admin')->middleware('auth:sanctum')->name('admin.')->group(function () {
     Route::post('/logout', [AdminAuthController::class, 'logout']);
     
-    Route::resource('vehicles', AdminVehicleController::class); // Menggunakan AdminVehicleController
+    Route::resource('vehicles', AdminVehicleController::class);
     
     Route::get('/rentals', [RentalController::class, 'index']);
     Route::patch('/rentals/{rental}/update-status', [RentalController::class, 'updateStatus']);

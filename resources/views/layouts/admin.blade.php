@@ -76,21 +76,22 @@
             <a href="{{ route('admin.dashboard') }}"
                 class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
             <a href="{{ route('admin.vehicles.index') }}"
-                class="nav-link {{ request()->routeIs('admin.vehicles.index') ? 'active' : '' }}">Manajemen
+                class="nav-link {{ request()->routeIs('admin.vehicles.*') ? 'active' : '' }}">Manajemen
                 Kendaraan</a>
             <a href="{{ route('admin.rentals.index') }}"
-                class="nav-link {{ request()->routeIs('admin.rentals.index') ? 'active' : '' }}">Manajemen Pemesanan</a>
+                class="nav-link {{ request()->routeIs('admin.rentals.*') ? 'active' : '' }}">Manajemen Pemesanan</a>
             <a href="{{ route('admin.payments.index') }}"
-                class="nav-link {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}">Manajemen
+                class="nav-link {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">Manajemen
                 Pembayaran</a>
-            {{-- --- PERUBAHAN PADA MENU NOTIFIKASI --- --}}
+            
+            <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                Manajemen Pengguna
+            </a>
             <a href="{{ route('admin.notifications.index') }}"
                 class="nav-link d-flex justify-content-between align-items-center {{ request()->routeIs('admin.notifications.index') ? 'active' : '' }}">
                 <span>Notifikasi</span>
-                {{-- Badge ini akan kita isi dengan angka dari JavaScript --}}
                 <span id="notification-badge" class="notification-badge" style="display: none;"></span>
             </a>
-            {{-- --- AKHIR PERUBAHAN --- --}}
             <hr class="text-secondary">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
@@ -111,6 +112,8 @@
                 <a href="{{ route('admin.vehicles.index') }}" class="nav-link">Manajemen Kendaraan</a>
                 <a href="{{ route('admin.rentals.index') }}" class="nav-link">Manajemen Pemesanan</a>
                 <a href="{{ route('admin.payments.index') }}" class="nav-link">Manajemen Pembayaran</a>
+
+                <a href="{{ route('admin.users.index') }}" class="nav-link">Manajemen Pengguna</a>
                 <a href="{{ route('admin.notifications.index') }}" class="nav-link">Notifikasi</a>
                 <hr class="text-secondary">
                 <form action="{{ route('admin.logout') }}" method="POST">
