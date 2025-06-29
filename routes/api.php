@@ -29,6 +29,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/register', [UserAuthController::class, 'register']);
 Route::post('/login', [UserAuthController::class, 'login']);
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
+Route::post('/forgot-password', [UserAuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [UserAuthController::class, 'resetPassword']);
 
 // Rute untuk melihat semua kendaraan yang tersedia
 Route::get('/vehicles', [UserVehicleController::class, 'index']);
