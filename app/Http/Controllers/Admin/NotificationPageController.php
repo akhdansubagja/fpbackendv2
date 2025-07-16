@@ -28,10 +28,6 @@ class NotificationPageController extends Controller
     // --- METHOD BARU: Untuk membaca notifikasi & redirect ---
     public function readAndRedirect(Notification $notification)
     {
-        // Pastikan admin hanya bisa mengakses notifikasinya sendiri
-        if (Auth::id() !== $notification->user_id) {
-            abort(403);
-        }
 
         // Tandai sebagai sudah dibaca
         $notification->update(['is_read' => true]);

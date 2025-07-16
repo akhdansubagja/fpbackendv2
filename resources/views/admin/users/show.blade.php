@@ -1,77 +1,56 @@
-{{-- File: resources/views/admin/users/show.blade.php --}}
-
 @extends('layouts.admin')
 
 @section('title', 'Detail Pengguna')
 
 @section('content')
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom" style="border-color: var(--border-color) !important;">
         <h1 class="h2">Detail Pengguna: {{ $user->name }}</h1>
-        <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Kembali ke Daftar
+        <a href="{{ route('admin.users.index') }}" class="back-link">
+            <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
 
-    <div class="row">
-        <div class="col-md-7">
+    <div class="row g-4">
+        {{-- Kolom Kiri --}}
+        <div class="col-lg-7">
             <div class="card">
                 <div class="card-header">
-                    Informasi Pribadi
+                    <h6 class="m-0 fw-bold">Informasi Pribadi</h6>
                 </div>
                 <div class="card-body">
-                    <table class="table table-borderless">
-                        <tr>
-                            <th style="width: 200px;">ID Pengguna</th>
-                            <td>: {{ $user->id }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nama Lengkap</th>
-                            <td>: {{ $user->name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Email</th>
-                            <td>: {{ $user->email }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nomor Telepon</th>
-                            <td>: {{ $user->nomor_telepon }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Lahir</th>
-                            <td>: {{ \Carbon\Carbon::parse($user->tanggal_lahir)->format('d F Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Alamat</th>
-                            <td>: {{ $user->alamat }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nomor Rekening</th>
-                            <td>: {{ $user->nomor_rekening ?? 'Belum diisi' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Registrasi</th>
-                            <td>: {{ $user->created_at->format('d F Y, H:i') }}</td>
-                        </tr>
-                    </table>
+                    {{-- Menggunakan info-grid yang stylenya kita tambah di admin.blade.php --}}
+                    <div class="info-grid">
+                        <strong>ID Pengguna:</strong> <span>{{ $user->id }}</span>
+                        <strong>Nama Lengkap:</strong> <span>{{ $user->name }}</span>
+                        <strong>Email:</strong> <span>{{ $user->email }}</span>
+                        <strong>Nomor Telepon:</strong> <span>{{ $user->nomor_telepon }}</span>
+                        <strong>Tanggal Lahir:</strong> <span>{{ \Carbon\Carbon::parse($user->tanggal_lahir)->format('d F Y') }}</span>
+                        <strong>Alamat:</strong> <span>{{ $user->alamat }}</span>
+                        <strong>Nomor Rekening:</strong> <span>{{ $user->nomor_rekening ?? 'Belum diisi' }}</span>
+                        <strong>Tgl. Registrasi:</strong> <span>{{ $user->created_at->format('d F Y, H:i') }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-5">
+        {{-- Kolom Kanan --}}
+        <div class="col-lg-5">
             <div class="card">
                 <div class="card-header">
-                    Dokumen SIM
+                    <h6 class="m-0 fw-bold">Dokumen SIM</h6>
                 </div>
                 <div class="card-body text-center">
                     @if($user->path_sim)
                         @php
                             $simPath = str_replace('public/', '', $user->path_sim);
                         @endphp
-                        <a href="{{ url('storage/' . $simPath) }}" target="_blank">
-                            <img src="{{ url('storage/' . $simPath) }}" alt="Foto SIM" class="img-fluid rounded border">
-                        </a>
+                        <div class="image-container">
+                             <a href="{{ url('storage/' . $simPath) }}" target="_blank">
+                                <img src="{{ url('storage/' . $simPath) }}" alt="Foto SIM">
+                            </a>
+                        </div>
                     @else
-                        <p class="text-muted fst-italic mt-3">Foto SIM tidak tersedia.</p>
+                        <p class="text-muted-color fst-italic mt-3">Foto SIM tidak tersedia.</p>
                     @endif
                 </div>
             </div>

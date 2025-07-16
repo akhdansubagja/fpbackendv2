@@ -15,11 +15,11 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie',],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:8100'],
+    'allowed_origins' => ['capacitor://localhost', 'ionic://localhost', 'https://yahabe.my.id', 'http://localhost:8100', 'https://localhost'],
 
     'allowed_origins_patterns' => [],
 

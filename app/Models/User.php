@@ -27,6 +27,7 @@ class User extends Authenticatable
         'alamat',
         'nomor_rekening',
         'role',
+        'fcm_token',
     ];
 
     /**

@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; // <-- Pastikan use statement ini ada
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PaymentSuccessMail; // Ini akan kita buat di langkah selanjutnya
+use Illuminate\Support\Facades\Log; // Untuk mencatat error jika ada
+use Illuminate\Models\User; // Untuk mengambil data user terkait
 
 class PaymentPageController extends Controller
 {
@@ -38,11 +42,35 @@ class PaymentPageController extends Controller
             // Jika lunas, konfirmasi pesanan
             $payment->rental()->update(['status_pemesanan' => 'dikonfirmasi']);
 
+            // Ambil data pengguna yang terkait
+            $user = $payment->rental->user;
+
+            // 1. Kirim PUSH NOTIFICATION (jika user punya token)
+            if ($user && $user->fcm_token) {
+                try {
+                    $messaging = app('firebase.messaging');
+                    $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $user->fcm_token)
+                        ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
+                            'Pembayaran Diterima!',
+                            'Pembayaran untuk pesanan #' . $payment->rental_id . ' telah kami konfirmasi.'
+                        ));
+                    $messaging->send($message);
+                } catch (\Exception $e) {
+                    Log::error('Gagal mengirim FCM Notifikasi: ' . $e->getMessage());
+                }
+            }
+
+            // 2. Kirim EMAIL KONFIRMASI
+            try {
+                Mail::to($user->email)->send(new PaymentSuccessMail($payment->rental));
+            } catch (\Exception $e) {
+                Log::error('Gagal mengirim Email Konfirmasi Pembayaran: ' . $e->getMessage());
+            }
+
         } elseif ($validated['status_pembayaran'] == 'gagal') {
-            // JIKA GAGAL, MAKA BATALKAN PESANAN
+            // Jika gagal, batalkan pesanan
             $payment->rental()->update(['status_pemesanan' => 'dibatalkan']);
         }
-        // Jika statusnya 'pending', kita tidak melakukan apa-apa pada status pemesanan.
 
         return redirect()->route('admin.payments.index')->with('success', 'Status pembayaran berhasil diperbarui!');
     }

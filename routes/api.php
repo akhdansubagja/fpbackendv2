@@ -43,6 +43,7 @@ Route::get('/vehicles', [UserVehicleController::class, 'index']);
 Route::get('/vehicles/{vehicle}/booked-dates', [UserVehicleController::class, 'getBookedDates']);
 
 
+
 // ==============================================
 // == GRUP ROUTE UNTUK USER YANG SUDAH LOGIN ==
 // ==============================================
@@ -62,6 +63,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/payments/{payment}/upload-proof', [UserPaymentController::class, 'uploadProof']);
 
     Route::get('/rentals/{rental}/status', [UserRentalController::class, 'checkStatus']);
+    
+    Route::post('/fcm-token', [UserAuthController::class, 'updateFcmToken']);
 });
 
 

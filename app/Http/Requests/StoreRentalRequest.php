@@ -21,7 +21,7 @@ class StoreRentalRequest extends FormRequest
             'delivery_option' => ['required', Rule::in(['pickup', 'delivered'])],
             'delivery_address' => ['nullable', 'required_if:delivery_option,delivered', 'string', 'max:255'],
             'payment_method' => ['required', Rule::in(['transfer', 'qris', 'bayar_di_tempat'])],
-            'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'payment_proof' => 'nullable|required_if:payment_method,transfer,qris|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ];
     }
 }
