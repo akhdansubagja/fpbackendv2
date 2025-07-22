@@ -33,3 +33,8 @@ Proyek ini dibagi menjadi dua repositori utama yang saling terintegrasi:
 * **Notifikasi Real-Time:** Pengiriman notifikasi *push* dan email kepada pengguna saat status pembayaran dan pesanan berubah.
 * **Manajemen Deposit & Keuangan:** Fitur khusus bagi admin untuk mengelola pengembalian *security deposit* dan dashboard yang menampilkan laporan keuangan akurat (Pendapatan Bersih, Total Uang Masuk, dll).
 * **Proses Rental End-to-End:** Alur bisnis lengkap mulai dari pencarian, pemesanan, pembayaran multi-metode (`transfer`, `qris`, `bayar_di_tempat`), hingga riwayat transaksi.
+
+---
+
+## 📂 Tampilan Aplikasi
+https://drive.google.com/drive/folders/1aTYwep_X8kMNuOFa9bB-NgzhFL4N5LOG?usp=drive_link
